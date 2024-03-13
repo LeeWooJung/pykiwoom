@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 import pythoncom
-from pykiwoom.kiwoom import Kiwoom
+from kiwoom import Kiwoom
 
 
 class KiwoomProxy:
@@ -41,6 +41,7 @@ class KiwoomProxy:
 
         # kiwoom instance
         self.kiwoom = Kiwoom(
+            login               = True,
             tr_dqueue           = self.tr_dqueue,
             real_dqueues        = self.real_dqueues,
             tr_cond_dqueue      = self.tr_cond_dqueue,
@@ -131,6 +132,9 @@ class KiwoomProxy:
 
                     self.kiwoom.SetRealReg(screen, ";".join(code_list),
                         ";".join(fid_list), str(opt_type))
+                elif func_name == "SetRealRemove":
+                    code = real_cmd['code']
+                    self.kiwoom.SetRealRemove(screen, del_code = code)
                 elif func_name == "DisConnectRealData":
                     self.kiwoom.DisconnectRealData(screen)
 
@@ -147,6 +151,10 @@ class KiwoomProxy:
                 if func_name == "GetConditionNameList":
                     cond_list = self.kiwoom.GetConditionNameList()
                     self.cond_dqueue.put(cond_list)
+                elif func_name == "GetMasterCodeName":
+                    code = cond_cmd['input']['종목코드']
+                    name = self.kiwoom.GetMasterCodeName(code)
+                    self.cond_dqueue.put(name)
                 else:
                 # parameters
                     cond_name = cond_cmd['cond_name']
