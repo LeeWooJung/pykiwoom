@@ -1,5 +1,5 @@
 import multiprocessing as mp
-from pykiwoom.kiwoom_proxy import KiwoomProxy
+from kiwoom_proxy import KiwoomProxy
 
 
 class KiwoomManager:
@@ -30,7 +30,7 @@ class KiwoomManager:
         self.chejan_dqueue      = mp.Queue()
 
         self.proxy = mp.Process(
-            target=KiwoomProxy,
+            target= KiwoomProxy,
             args=(
                 # method queue
                 self.method_cqueue,
