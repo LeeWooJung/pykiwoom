@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 import pythoncom
 import datetime
-from pykiwoom import parser
+import parser
 import pandas as pd
 
 
@@ -181,7 +181,8 @@ class Kiwoom:
                 pass
 
     def OnReceiveMsg(self, screen, rqname, trcode, msg):
-        pass
+        now = datetime.datetime.now()
+        print(f"[{now.hour}:{now.minute}] OrderName - {rqname}, Msg - {msg}")
 
     def OnReceiveChejanData(self, gubun, item_cnt, fid_list):
         """주문접수, 체결, 잔고 변경시 이벤트가 발생
