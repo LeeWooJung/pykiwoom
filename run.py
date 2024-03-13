@@ -10,7 +10,7 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from pykiwoom.manager import KiwoomManager as km
+from PyKiwoom.manager import KiwoomManager as km
 
 class window(QMainWindow):
     def __init__(self):
