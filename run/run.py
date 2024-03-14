@@ -252,7 +252,8 @@ class program(QThread) :
             valuable = set(self.findConditionMatchingCodes(conditions, '가치주')).intersection(set(codes))
             goodProfitable = set(self.findConditionMatchingCodes(conditions, '수익성좋은기업')).intersection(set(codes))
 
-            couldBuy = list(largeValuable.union(valuable).union(goodProfitable))
+            couldBuy = largeValuable.union(valuable).union(goodProfitable)
+            couldBuy = list(couldBuy.difference(set(self.stockInfo.keys())))
 
             self.emitTxt(self.line)
             if len(couldBuy) > 0 :
