@@ -80,8 +80,6 @@ class program(QThread) :
             results.append(self.findToBuy())
             results.append(self.checkUntil15())
             self.result_ready.emit("\n".join(results))
-            
-            self.stop()
         return
     
     def stop(self):
@@ -227,6 +225,7 @@ class program(QThread) :
             now = curtime.now()
             if over15:
                 self.emitTxt(self.line + f"\nTime : [{now.hour}:{now.minute} Quit Program....]")
+                self.stop()
                 break
             
             self.checkBuyPoint()
@@ -297,13 +296,7 @@ class program(QThread) :
             if self.stockInfo.get(code) is not None: # 현재 보유 목록에 존재하면 skip
                 continue
             
-            cmd = {
-                'screen' : self.buyScreen,
-                'func_name' : 'GetMasterCodeName',
-                'input' : {'종목코드' : code}
-            }
-            self.manager.put_cond(cmd)
-            name = self.manager.get_cond(method = True)
+            name = names[index]
 
             price = self.getRealTimeData(code, name, '10')
             
