@@ -5,6 +5,8 @@ Python Wrapper for Kiwoom Open API+
 
 https://wikidocs.net/book/1173
 
+# PYTHONPATH에 해당 경로를 추가해주어야 moudle을 제대로 읽음
+  (왜냐면 __init__.py에서 Path를 그렇게 해주고 있기 때문에)
 
 # Examples
 

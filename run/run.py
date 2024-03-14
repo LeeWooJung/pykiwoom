@@ -522,7 +522,7 @@ class program(QThread) :
         time.sleep(0.2)
         data = self.manager.get_tr()
 
-        for _, row in  data[0].iterrows():
+        for _, row in data[0].iterrows():
               gotCode = row['종목코드'][1:] # 앞에 A가 붙어있음.
               if gotCode == code:
                    avgPrice = float(row['평균단가'])
