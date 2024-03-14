@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 import pythoncom
 import datetime
-import parser
+import kiwoomParser as parser
 import pandas as pd
 
 
