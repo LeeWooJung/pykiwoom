@@ -10,34 +10,80 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from pykiwoom.manager import KiwoomManager as km
+from manager import KiwoomManager as km
 
 class window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setGeometry(300, 300, 400, 300)
+        self.setGeometry(300, 300, 800, 600)
         self.setWindowTitle("키움 주식 매매 프로그램")
-
-        self.text = QPlainTextEdit(self)
+        
+        self.text = QPlainTextEdit()
         self.text.setReadOnly(True)
-        self.text.move(10, 10)
-        self.text.resize(380, 280)
+        self.textLabel = QLabel("Program Output")
+        
+        self.enrolledTxt = QPlainTextEdit()
+        self.enrolledTxt.setReadOnly(True)
+        self.enrolledLabel = QLabel("Subscribe Output")
+        
+        self.splitter = QHBoxLayout() # 수평 layout
+        
+        textLayout = QVBoxLayout() # 수직 layout
+        textLayout.addWidget(self.textLabel)
+        textLayout.addWidget(self.text)
+        self.splitter.addLayout(textLayout)
+        
+        enrolledLayout = QVBoxLayout()
+        enrolledLayout.addWidget(self.enrolledLabel)
+        enrolledLayout.addWidget(self.enrolledTxt)
+        self.splitter.addLayout(enrolledLayout)
+        
+        centralWidget = QWidget()
+        centralWidget.setLayout(self.splitter)
+        self.setCentralWidget(centralWidget)
+        
+        self.sellAllButton = QPushButton("Sell All Stocks", self)
+        self.sellAllButton.move(10, 220)
+        self.sellAllButton.clicked.connect(self.sellAllButtonClicked)
+        
+        buttonLayout = QVBoxLayout()
+        buttonLayout.addStretch()
+        buttonLayout.addWidget(self.sellAllButton)
+        
+        self.splitter.addLayout(buttonLayout)
 
         self.thread = program()
         self.thread.result_ready.connect(self.update_result)
+        self.thread.enrolled_ready.connect(self.update_enrolled)
         self.thread.start()
 
-    def update_result(self, result):
-        self.text.appendPlainText(result)
+    def update_result(self, text):
+        self.text.appendPlainText(text)
+        
+    def update_enrolled(self, text):
+        self.enrolledTxt.appendPlainText(text)
+        
+    def sellAllButtonClicked(self):
+        reply = QMessageBox.question(self, 'Sell All Stocks', '모든 주식을 현재가로 판매하시겠습니까?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.sellAllStocks(self)
 
     def closeEvent(self, event):
         self.thread.stop()
-        #self.thread.wait()
-        event.accept()
+        super().closeEvent(event)
+        
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.resizeTxtAreas(event.size())
+    
+    def resizeTxtAreas(self, size):
+        self.text.setGeometry(10, 10, int(size.width() / 2) - 15, int(size.height()) - 20)
+        self.enrolledTxt.setGeometry(int(size.width() / 2) + 5, 10, int(size.width() / 2) - 15, size.height() - 20)
 
 class program(QThread) :
     
     result_ready = pyqtSignal(str)
+    enrolled_ready = pyqtSignal(str)
 
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -71,19 +117,19 @@ class program(QThread) :
         self.manager = km()
         
     def run(self):
+        self.manager.startProxy()
         while not self.stopped:
-            results = []
-            results.append(self.getInfo())
-            results.append(self.getDeposit())
-            results.append(self.getAccountStatus())
-            time.sleep(1)
-            results.append(self.findToBuy())
-            results.append(self.checkUntil15())
-            self.result_ready.emit("\n".join(results))
-        return
+            self.getInfo()
+            self.getDeposit()
+            self.getAccountStatus()
+            time.sleep(0.5)
+            self.findToBuy()
+            self.checkUntil15()
+            self.stop()
     
     def stop(self):
         self.stopped = True
+        self.manager.stopProxy()
 
 ###########################################################################################
 #   Initial Methods
@@ -270,15 +316,7 @@ class program(QThread) :
             topRated = couldBuy[:5] if len(couldBuy) > 5 else couldBuy
             topRatedName = []
             for code in topRated :
-                cmd = {
-                'screen' : self.buyScreen,
-                'func_name' : 'GetMasterCodeName',
-                'input' : {'종목코드' : code}
-                }
-                
-                self.manager.put_cond(cmd)
-                time.sleep(0.2)
-                name = self.manager.get_cond(method = True)
+                name = self.getName(self.buyScreen, code)
                 topRatedName.append(name)
 
             self.emitTxt(f"\nTo buy List is : {topRatedName}")
@@ -317,9 +355,10 @@ class program(QThread) :
 ###########################################################################################
 #   Related Sell Stocks
 #   1) orderSell : 주어지는 코드에 대한 주문 진행
-#   2) checkSellPoint : 매도 포인트를 확인하고 주문 진행하는 메소드 모음
-#   3) priceSignal : 지갑 내에 있는 주식의 평단과 현재가를 비교하여 매도 주문
-#   4) sellSignal
+#   2) sellAllStocks : 보유한 모든 주식 현재가로 판매
+#   3) checkSellPoint : 매도 포인트를 확인하고 주문 진행하는 메소드 모음
+#   4) priceSignal : 지갑 내에 있는 주식의 평단과 현재가를 비교하여 매도 주문
+#   5) sellSignal
 ###########################################################################################
                         
     def orderSell(self, code, name, numStock):
@@ -337,6 +376,10 @@ class program(QThread) :
         time.sleep(5)
 
         return
+    
+    def sellAllStocks(self):
+        codes = list(self.stockInfo.keys())
+        pass
     
     def checkSellPoint(self) :
 
@@ -361,15 +404,7 @@ class program(QThread) :
             numStock = info[0]
             avgPrice = info[1]
             
-            cmd = {
-                'screen' : self.sellScreen,
-                'func_name' : 'GetMasterCodeName',
-                'input' : {'종목코드' : code}
-            }
-            self.manager.put_cond(cmd)
-            time.sleep(0.2)
-            name = self.manager.get_cond(method = True)
-
+            name = self.getName(self.sellScreen, code)
             price = self.getRealTimeData(code, name, '10') # 시가
             self.emitTxt(f"numStock = {numStock}, avgPrice = {int(avgPrice)}, currentPrice = {price}")
 
@@ -394,6 +429,7 @@ class program(QThread) :
 #   3) setRealRemoveAll : 구독 되어있는 모든 항목에 대한 구독 해제
 #   4) marketPriceOrder : 시장가로 매수 혹은 매도 주문 진행
 #   5) addStockInfo : 매수 주문한 stock을 저장
+#   6) getName : 주어진 코드의 주식 이름을 반환
 ###########################################################################################
     """
         @method setRealReg
@@ -432,6 +468,7 @@ class program(QThread) :
         
         self.manager.put_real(cmd)
         self.emitTxt(f"\nEnroll Codes Success")
+        self.emitEnrolled()
 
     def setRealRegRemove(self, code) :
         txt = self.line
@@ -454,6 +491,7 @@ class program(QThread) :
         else:
             txt += f"\nThe code[{code}] is not registered... Something Wrong!"
         self.emitTxt(txt)
+        self.emitEnrolled()
 
     def setRealRemoveAll(self) :
 
@@ -461,6 +499,7 @@ class program(QThread) :
         
         self.setRealRegRemove('ALL')
         self.enrolled['codes'] = []
+        self.emitEnrolled()
 
     """
         @method marketPriceOrder
@@ -525,6 +564,18 @@ class program(QThread) :
                    self.stockInfo[code] = [stockCount, avgPrice]
                    break
         return
+    
+    def getName(self, screen, code) :
+        
+        cmd = {
+            'screen' : screen,
+            'func_name' : 'GetMasterCodeName',
+            'input' : {'종목코드' : code}
+        }
+        self.manager.put_cond(cmd)
+        name = self.manager.get_cond(method = True)
+        
+        return name
 
 ###########################################################################################
 #   Wait to Receive Msg From the Server
@@ -629,6 +680,8 @@ class program(QThread) :
 #   3) changeDeposit
 #   4) waitUntil9
 #   5) check15
+#   6) emitTxt
+#   7) emitEnrolled
 ###########################################################################################
 
     def findConditionMatchingCodes(self, conditions, cName) :
@@ -777,6 +830,16 @@ class program(QThread) :
         
     def emitTxt(self, txt):
         self.result_ready.emit(txt)
+        
+    def emitEnrolled(self):
+        now = curtime.now()
+        txt = f"[{now.hour}:{now.minute}] Subscribing Codes are ......"
+        
+        for code in self.enrolled['codes']:
+            name = self.getName(self.lookupScreen, code)
+            txt += f"\nCode : {code}, Name : {name}"
+        
+        self.enrolled_ready.emit(txt)
        
 
 
