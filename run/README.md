@@ -232,6 +232,8 @@ orderType(Buy, Sell)에 따라 매수 혹은 매도 신청을 하기 위한 메�
 > changeDeposit()  
 > waitUntil9()  
 > check15()  
+> emitTxt()  
+> emitEnrolled()
 ### findConditionMatchingCodes(conditions, cName)
 
 키움 증권에 저장된 조건과 주어진 조건이 일치하면 해당 조건에 부합하는 코드를 반환하는 메소드
