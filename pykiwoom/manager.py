@@ -28,7 +28,12 @@ class KiwoomManager:
 
         # chejan queue
         self.chejan_dqueue      = mp.Queue()
-
+        
+        self.proxy = None
+        self.daemon = daemon
+        
+    def startProxy(self) :
+        
         self.proxy = mp.Process(
             target= KiwoomProxy,
             args=(
@@ -51,9 +56,15 @@ class KiwoomManager:
                 # chejan queue
                 self.chejan_dqueue
             ),
-            daemon=daemon
+            daemon = self.daemon
         )
         self.proxy.start()
+        
+    def stopProxy(self):
+        if self.proxy is not None:
+            self.proxy.terminate()
+            self.proxy.join()
+        
 
     # method
     def put_method(self, cmd):
