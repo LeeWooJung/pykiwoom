@@ -1,5 +1,12 @@
 # run.py
 
+## path
+
+```python
+import sys
+sys.path.append('../pykiwoom')
+```
+
 ## program class
 
 ### __init__
@@ -109,6 +116,7 @@
 * * *
 > ## ***Related Sell Stocks***
 > orderSell()  
+> sellAllStocks()  
 > checkSellPoint()  
 > priceSignal()  
 > sellSignal()  
@@ -120,6 +128,10 @@
     - 매도 후 '주문 가능 금액' 업데이트
 * Method Call : **setRealRegRemove(code)**
     - 매도 후 구독 해제 신청
+* * *
+### sellAllStocks()
+
+* 작성중
 * * *
 ### checkSellPoint()
 
@@ -152,6 +164,7 @@
 > setRealRemoveAll()  
 > marketPriceOrder()  
 > addStockInfo()  
+> getName()  
 ### setRealReg(codes)
 
 키움 증권에 구독신청을 하기 위한 메소드
@@ -180,6 +193,10 @@ orderType(Buy, Sell)에 따라 매수 혹은 매도 신청을 하기 위한 메�
 
 * TrCode : **opw00004**
 * manager를 호출하여 '종목코드', '평균단가', '보유수량'에 대한 TR 정보를 획득
+* * *
+### getName(screen, code)
+
+주어진 주식 code(ticker)의 이름을 반환하기 위한 메소드
 * * *
 > ## ***Wait to Receive Msg From the Server***
 > waitforOrderResult()  
@@ -252,3 +269,11 @@ orderType(Buy, Sell)에 따라 매수 혹은 매도 신청을 하기 위한 메�
 ### check15()
 
 15시 이후에 프로그램을 종료하게 하기 위한 메소드
+
+### emitTxt(txt)
+
+주어진 txt를 window 화면에 출력하기 위한 메소드
+
+### emitEnrolled()
+
+현재 구독중인 주식 정보에 대해 출력하기 위한 메소드
