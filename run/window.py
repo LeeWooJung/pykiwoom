@@ -81,11 +81,20 @@ class window(QMainWindow):
         
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.resizeTxtAreas(event.size())
+        self.resizeAreas(event.size())
     
-    def resizeTxtAreas(self, size):
-        self.text.setGeometry(10, 10, int(size.width() / 2) - 15, int(size.height()) - 20)
-        self.enrolledTxt.setGeometry(int(size.width() / 2) + 5, 10, int(size.width() / 2) - 15, size.height() - 20)
+    def resizeAreas(self, size):
+        width = int(size.width() / 3) - 15
+        height = size.height() - 20
+        
+        self.text.setGeometry(10, 10, width, height)
+        self.enrolledTxt.setGeometry(10 + width + 10, 10, width, height)
+        self.table.setGeometry(10 + 2*width + 10, 10, width, height)
+        self.sellAllButton.setGeometry(10 + 2*width + 10, height + 3, width, 20)
+        
+        self.textLabel.setGeometry(10, 3, width, 10)
+        self.enrolledLabel.setGeometry(10 + width + 10, 3, width, 10)
+        self.tableLabel.setGeometry(10 + 2*width + 10, 3, width, 10)
         
     def tableDoubleClicked(self, index):
         row = index.row()
