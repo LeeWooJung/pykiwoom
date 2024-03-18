@@ -1,4 +1,4 @@
-# run.py
+# program.py
 
 ## path
 
@@ -18,6 +18,7 @@ sys.path.append('../pykiwoom')
     - lookupScreen : TR 등에 대한 검색 관련 Screen
     - buyScreen : 매수 관련 Screen
     - sellScreen : 매도 관련 Screen
+    - tableScreen : 현재 보유 주식 table 관련 Screen
 * 다른 정보
     - stockInfo : 보유중인 주식 정보 저장
     - enrolled : 구독중인 주식 정보 저장
@@ -234,6 +235,7 @@ orderType(Buy, Sell)에 따라 매수 혹은 매도 신청을 하기 위한 메�
 > check15()  
 > emitTxt()  
 > emitEnrolled()
+> emitStockInfo()
 ### findConditionMatchingCodes(conditions, cName)
 
 키움 증권에 저장된 조건과 주어진 조건이 일치하면 해당 조건에 부합하는 코드를 반환하는 메소드
@@ -279,3 +281,7 @@ orderType(Buy, Sell)에 따라 매수 혹은 매도 신청을 하기 위한 메�
 ### emitEnrolled()
 
 현재 구독중인 주식 정보에 대해 출력하기 위한 메소드
+
+### emitStockInfo()
+
+현재 보유중인 주식 정보에 대해 출력하기 위한 메소드
